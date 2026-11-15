@@ -11,6 +11,10 @@ namespace Exita.Utara.Map
         public float bundWidth = 2f;
         public float bundHeight = 0.8f;
 
+        [Header("Appearance")]
+        public Color soilColor =
+            new Color(0.38f, 0.27f, 0.15f);
+
         [ContextMenu("Build Field Bund")]
         public void BuildBund()
         {
@@ -41,12 +45,22 @@ namespace Exita.Utara.Map
             };
 
             Mesh mesh = new Mesh();
-            mesh.name = "PokokJawiFieldBund";
+            mesh.name = "EXITA_PokokJawi_FieldBund";
             mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.RecalculateNormals();
 
             GetComponent<MeshFilter>().sharedMesh = mesh;
+
+            Material material = new Material(
+                Shader.Find("Standard")
+            );
+
+            material.color = soilColor;
+
+            GetComponent<MeshRenderer>().sharedMaterial = material;
+
+            Debug.Log("EXITA: Field bund created.");
         }
     }
 }
