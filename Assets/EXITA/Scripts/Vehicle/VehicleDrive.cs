@@ -6,12 +6,16 @@ namespace ExitaUtara
     [RequireComponent(typeof(Rigidbody))]
     public class VehicleDrive : MonoBehaviour
     {
+        [Header("Engine")]
         public float acceleration = 5f;
         public float maxSpeed = 12f;
         public float reverseSpeed = 4f;
         public float brakePower = 8f;
+
+        [Header("Steering")]
         public float turnSpeed = 65f;
 
+        [Header("Systems")]
         public VehicleFuelSystem fuelSystem;
         public VehicleEngineStarter engineStarter;
         public VehicleGearSystem gearSystem;
@@ -35,21 +39,22 @@ namespace ExitaUtara
             bool engineOn = engineStarter != null &&
                             engineStarter.EngineRunning;
 
-            bool hasFuel = fuelSystem == null ||
+            bool hasFuel = fuelSystem != null &&
                            fuelSystem.HasFuel();
 
             int gear = gearSystem != null
                 ? gearSystem.GetGearValue() : 0;
 
-            float speedLimit = gear < 0
-                ? reverseSpeed : maxSpeed;
-
             Vector3 localVelocity =
                 transform.InverseTransformDirection(rb.velocity);
 
+            float speedLimit = gear < 0
+                ? reverseSpeed : maxSpeed;
+
+            float forwardSpeed = localVelocity.z * gear;
+
             if (engineOn && hasFuel && gear != 0 &&
-                throttle > 0f &&
-                localVelocity.z * gear < speedLimit)
+                throttle > 0f && forwardSpeed < speedLimit)
             {
                 rb.AddForce(
                     transform.forward * gear * acceleration,
@@ -57,7 +62,7 @@ namespace ExitaUtara
                 );
             }
 
-            if (brake > 0f)
+            if (brake > 0f && rb.velocity.sqrMagnitude > 0.01f)
             {
                 rb.AddForce(
                     -rb.velocity.normalized * brakePower,
@@ -67,7 +72,8 @@ namespace ExitaUtara
 
             if (Mathf.Abs(localVelocity.z) > 0.2f)
             {
-                float direction = localVelocity.z >= 0f ? 1f : -1f;
+                float direction =
+                    Mathf.Sign(localVelocity.z);
 
                 rb.MoveRotation(
                     rb.rotation * Quaternion.Euler(
