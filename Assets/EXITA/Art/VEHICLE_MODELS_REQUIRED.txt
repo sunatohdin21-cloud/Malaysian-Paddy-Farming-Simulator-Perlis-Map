@@ -1,0 +1,8 @@
+MODEL 3D YANG MASIH PERLU DIBUAT/DIMASUKKAN
+- Ford half-track tractor: front rubber tyres, rear steel tracks.
+- Mercedes-Benz half-track tractor: front rubber tyres, rear steel tracks.
+- Mitsubishi half-track tractor: front rubber tyres, rear steel tracks.
+- New Holland 1454: front steel tracks, rear rubber tyres.
+- New Holland 8080: front steel tracks, rear rubber tyres.
+- Hino 500 tipper truck.
+Jangan tukar orientasi tayar/track yang telah ditetapkan.

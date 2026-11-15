@@ -1,0 +1,9 @@
+MODEL PERALATAN SAWAH YANG MASIH PERLU DIMASUKKAN
+- Bajak
+- Rotavator
+- Perata tanah / land leveller
+- Penanam padi
+- Penyebar baja
+- Penyembur racun
+- Header/jentera menuai dan trailer padi
+Setiap model perlu mempunyai pivot, skala, titik sambungan dan collider yang sesuai.

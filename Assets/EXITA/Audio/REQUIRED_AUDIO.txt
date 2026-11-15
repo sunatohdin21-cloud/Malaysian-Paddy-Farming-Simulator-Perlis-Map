@@ -1,0 +1,4 @@
+AUDIO MASIH PERLU DIMASUKKAN
+Masukkan rakaman diesel turbo/ekzos yang anda miliki atau audio berlesen.
+Fail audio belum disertakan. EngineExhaustAudio.cs hanya mengawal pitch/volume
+berdasarkan input dan kelajuan; ia tidak menghasilkan rakaman ekzos sebenar.
