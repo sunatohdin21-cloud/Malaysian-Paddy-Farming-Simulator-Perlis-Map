@@ -11,6 +11,9 @@ namespace Exita.Utara.Map
         public float canalWidth = 5f;
         public float canalDepth = 1.5f;
 
+        [Header("Appearance")]
+        public Color soilColor = new Color(0.30f, 0.22f, 0.12f);
+
         [ContextMenu("Build Canal")]
         public void BuildCanal()
         {
@@ -40,18 +43,32 @@ namespace Exita.Utara.Map
             };
 
             Mesh mesh = new Mesh();
-            mesh.name = "PokokJawiCanalMesh";
+            mesh.name = "EXITA_PokokJawi_Canal";
             mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.RecalculateNormals();
 
-            GetComponent<MeshFilter>().sharedMesh = mesh;
+            MeshFilter filter = GetComponent<MeshFilter>();
+            filter.sharedMesh = mesh;
+
+            MeshRenderer renderer = GetComponent<MeshRenderer>();
+
+            Material material = new Material(
+                Shader.Find("Standard")
+            );
+
+            material.color = soilColor;
+            renderer.sharedMaterial = material;
 
             MeshCollider collider = GetComponent<MeshCollider>();
+
             if (collider == null)
                 collider = gameObject.AddComponent<MeshCollider>();
 
+            collider.sharedMesh = null;
             collider.sharedMesh = mesh;
+
+            Debug.Log("EXITA: Canal mesh generated.");
         }
     }
 }
