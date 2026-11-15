@@ -17,7 +17,10 @@ public class PokokJawiSceneGenerator
 
         GameObject map = new GameObject("POKOK JAWI MAP");
 
-        map.AddComponent<PokokJawiMapSetup>();
+        PokokJawiMapSetup setup =
+            map.AddComponent<PokokJawiMapSetup>();
+
+        setup.BuildMap();
 
         GameObject camera = GameObject.FindWithTag("MainCamera");
 
@@ -44,6 +47,6 @@ public class PokokJawiSceneGenerator
 
         AssetDatabase.SaveAssets();
 
-        Debug.Log("Pokok Jawi Scene created!");
+        Debug.Log("EXITA: Pokok Jawi scene generated!");
     }
 }
