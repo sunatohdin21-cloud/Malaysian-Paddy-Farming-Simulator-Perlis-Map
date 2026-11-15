@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 namespace ExitaUtara
@@ -5,61 +6,73 @@ namespace ExitaUtara
     [RequireComponent(typeof(Rigidbody))]
     public class VehicleDrive : MonoBehaviour
     {
-        [Header("Drive tuning")]
-        [SerializeField] private float motorTorque = 1800f;
-        [SerializeField] private float brakeTorque = 2600f;
-        [SerializeField] private float maxSpeedKph = 45f;
-        [SerializeField] private float steeringDegrees = 28f;
-        [SerializeField] private float steeringResponse = 3f;
+        [Header("Engine")]
+        public float acceleration = 5f;
+        public float maxSpeed = 12f;
+        public float reverseSpeed = 4f;
+        public float brakePower = 8f;
 
-        [Header("Wheel colliders")]
-        [SerializeField] private WheelCollider[] poweredWheels;
-        [SerializeField] private WheelCollider[] steeringWheels;
-        [SerializeField] private WheelCollider[] allWheels;
+        [Header("Steering")]
+        public float turnSpeed = 65f;
 
-        private Rigidbody body;
-        private float throttle;
-        private float steering;
-        private float brake;
-
-        public float SpeedKph => body == null ? 0f : body.velocity.magnitude * 3.6f;
-        public float EngineLoad => Mathf.Clamp01(Mathf.Abs(throttle) * 0.8f + brake * 0.2f);
-        public float Throttle => throttle;
+        private Rigidbody rb;
 
         private void Awake()
         {
-            body = GetComponent<Rigidbody>();
-            body.interpolation = RigidbodyInterpolation.Interpolate;
-            body.centerOfMass = new Vector3(0f, -0.45f, 0f);
+            rb = GetComponent<Rigidbody>();
+            rb.mass = 2500f;
+            rb.drag = 0.5f;
+            rb.angularDrag = 3f;
         }
-
-        // Connect these methods to the mobile HUD buttons/joystick.
-        public void SetThrottle(float value) => throttle = Mathf.Clamp(value, -1f, 1f);
-        public void SetSteering(float value) => steering = Mathf.Clamp(value, -1f, 1f);
-        public void SetBrake(float value) => brake = Mathf.Clamp01(value);
 
         private void FixedUpdate()
         {
-            float speedFactor = Mathf.Clamp01(1f - SpeedKph / Mathf.Max(1f, maxSpeedKph));
-            foreach (var wheel in poweredWheels)
-                if (wheel != null)
-                    wheel.motorTorque = throttle * motorTorque * speedFactor;
+            float throttle = MobileTractorInput.Throttle;
+            float brake = MobileTractorInput.Brake;
+            float steering = MobileTractorInput.Steering;
 
-            foreach (var wheel in steeringWheels)
-                if (wheel != null)
-                    wheel.steerAngle = Mathf.Lerp(wheel.steerAngle,
-                        steering * steeringDegrees, Time.fixedDeltaTime * steeringResponse);
+            Vector3 localVelocity =
+                transform.InverseTransformDirection(rb.velocity);
 
-            foreach (var wheel in allWheels)
-                if (wheel != null)
-                    wheel.brakeTorque = brake * brakeTorque;
-        }
+            if (throttle > 0f &&
+                localVelocity.z < maxSpeed)
+            {
+                rb.AddForce(
+                    transform.forward * acceleration,
+                    ForceMode.Acceleration
+                );
+            }
 
-        private void OnDisable()
-        {
-            if (poweredWheels != null)
-                foreach (var wheel in poweredWheels)
-                    if (wheel != null) wheel.motorTorque = 0f;
+            if (brake > 0f)
+            {
+                rb.AddForce(
+                    -rb.velocity.normalized * brakePower,
+                    ForceMode.Acceleration
+                );
+            }
+
+            if (localVelocity.z > 0.2f ||
+                localVelocity.z < -0.2f)
+            {
+                float direction =
+                    localVelocity.z >= 0f ? 1f : -1f;
+
+                Quaternion turn = Quaternion.Euler(
+                    0f,
+                    steering * turnSpeed *
+                    direction * Time.fixedDeltaTime,
+                    0f
+                );
+
+                rb.MoveRotation(rb.rotation * turn);
+            }
+
+            if (localVelocity.z < -reverseSpeed)
+            {
+                Vector3 velocity = transform.forward * -reverseSpeed;
+                velocity.y = rb.velocity.y;
+                rb.velocity = velocity;
+            }
         }
     }
 }
