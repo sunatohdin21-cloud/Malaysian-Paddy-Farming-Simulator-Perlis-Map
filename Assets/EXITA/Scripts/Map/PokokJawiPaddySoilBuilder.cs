@@ -12,21 +12,34 @@ namespace Exita.Utara.Map
         public int subdivisions = 30;
         public float unevenness = 0.12f;
 
+        [Header("Muddy Appearance")]
+        public Color mudColor =
+            new Color(0.25f, 0.19f, 0.12f);
+
+        [Range(0f, 1f)]
+        public float wetness = 0.45f;
+
         [ContextMenu("Build Paddy Soil")]
         public void BuildSoil()
         {
             subdivisions = Mathf.Max(2, subdivisions);
 
             int side = subdivisions + 1;
+
             Vector3[] vertices = new Vector3[side * side];
-            int[] triangles = new int[subdivisions * subdivisions * 6];
+
+            int[] triangles =
+                new int[subdivisions * subdivisions * 6];
 
             for (int z = 0; z < side; z++)
             {
                 for (int x = 0; x < side; x++)
                 {
-                    float px = (float)x / subdivisions * soilWidth;
-                    float pz = (float)z / subdivisions * soilLength;
+                    float px =
+                        (float)x / subdivisions * soilWidth;
+
+                    float pz =
+                        (float)z / subdivisions * soilLength;
 
                     float height =
                         Mathf.Sin(px * 0.12f) *
@@ -60,12 +73,27 @@ namespace Exita.Utara.Map
             }
 
             Mesh mesh = new Mesh();
-            mesh.name = "PokokJawiMuddyPaddySoil";
+            mesh.name = "EXITA_PokokJawi_MuddySoil";
             mesh.vertices = vertices;
             mesh.triangles = triangles;
             mesh.RecalculateNormals();
 
             GetComponent<MeshFilter>().sharedMesh = mesh;
+
+            Material material = new Material(
+                Shader.Find("Standard")
+            );
+
+            material.color = mudColor;
+            material.SetFloat(
+                "_Glossiness",
+                wetness
+            );
+
+            GetComponent<MeshRenderer>().sharedMaterial =
+                material;
+
+            Debug.Log("EXITA: Muddy paddy soil created.");
         }
     }
 }
