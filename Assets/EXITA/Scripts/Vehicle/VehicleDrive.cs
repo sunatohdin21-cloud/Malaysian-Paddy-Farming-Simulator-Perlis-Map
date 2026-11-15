@@ -9,11 +9,13 @@ namespace ExitaUtara
         [Header("Engine")]
         public float acceleration = 5f;
         public float maxSpeed = 12f;
-        public float reverseSpeed = 4f;
         public float brakePower = 8f;
 
         [Header("Steering")]
         public float turnSpeed = 65f;
+
+        [Header("Fuel")]
+        public VehicleFuelSystem fuelSystem;
 
         private Rigidbody rb;
 
@@ -31,11 +33,14 @@ namespace ExitaUtara
             float brake = MobileTractorInput.Brake;
             float steering = MobileTractorInput.Steering;
 
-            Vector3 localVelocity =
+            bool hasFuel = fuelSystem == null ||
+                           fuelSystem.HasFuel();
+
+            Vector3 velocity =
                 transform.InverseTransformDirection(rb.velocity);
 
-            if (throttle > 0f &&
-                localVelocity.z < maxSpeed)
+            if (throttle > 0f && hasFuel &&
+                velocity.z < maxSpeed)
             {
                 rb.AddForce(
                     transform.forward * acceleration,
@@ -51,27 +56,18 @@ namespace ExitaUtara
                 );
             }
 
-            if (localVelocity.z > 0.2f ||
-                localVelocity.z < -0.2f)
+            if (Mathf.Abs(velocity.z) > 0.2f)
             {
-                float direction =
-                    localVelocity.z >= 0f ? 1f : -1f;
+                float direction = velocity.z >= 0f ? 1f : -1f;
 
-                Quaternion turn = Quaternion.Euler(
+                Quaternion rotation = Quaternion.Euler(
                     0f,
                     steering * turnSpeed *
                     direction * Time.fixedDeltaTime,
                     0f
                 );
 
-                rb.MoveRotation(rb.rotation * turn);
-            }
-
-            if (localVelocity.z < -reverseSpeed)
-            {
-                Vector3 velocity = transform.forward * -reverseSpeed;
-                velocity.y = rb.velocity.y;
-                rb.velocity = velocity;
+                rb.MoveRotation(rb.rotation * rotation);
             }
         }
     }
