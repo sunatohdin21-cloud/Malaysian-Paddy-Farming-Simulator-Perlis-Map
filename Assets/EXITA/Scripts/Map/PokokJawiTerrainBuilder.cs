@@ -40,11 +40,22 @@ namespace Exita.Utara.Map
 
             data.SetHeights(0, 0, heights);
 
+            Transform oldTerrain =
+                transform.Find("Pokok Jawi Paddy Terrain");
+
+            if (oldTerrain != null)
+            {
+                DestroyImmediate(oldTerrain.gameObject);
+            }
+
             GameObject terrainObject =
                 Terrain.CreateTerrainGameObject(data);
 
             terrainObject.name = "Pokok Jawi Paddy Terrain";
-            terrainObject.transform.position = Vector3.zero;
+            terrainObject.transform.SetParent(transform, false);
+            terrainObject.transform.localPosition = Vector3.zero;
+
+            Debug.Log("EXITA: Pokok Jawi terrain created.");
         }
     }
 }
