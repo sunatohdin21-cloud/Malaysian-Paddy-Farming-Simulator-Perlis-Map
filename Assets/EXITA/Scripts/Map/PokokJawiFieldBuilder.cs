@@ -12,18 +12,26 @@ namespace Exita.Utara.Map
         public float fieldLength = 150f;
         public float gap = 12f;
 
+        [Header("Field Appearance")]
+        public Color soilColor = new Color(0.32f, 0.25f, 0.13f);
+        public float surfaceHeight = 0.05f;
+
         [ContextMenu("Build Paddy Field Layout")]
         public void BuildFields()
         {
             Transform oldFields = transform.Find("PaddyFields");
 
             if (oldFields != null)
-            {
                 DestroyImmediate(oldFields.gameObject);
-            }
 
             GameObject root = new GameObject("PaddyFields");
             root.transform.SetParent(transform, false);
+
+            Material soilMaterial = new Material(
+                Shader.Find("Standard")
+            );
+
+            soilMaterial.color = soilColor;
 
             for (int row = 0; row < rows; row++)
             {
@@ -37,17 +45,42 @@ namespace Exita.Utara.Map
 
                     field.transform.localPosition = new Vector3(
                         col * (fieldWidth + gap),
-                        0f,
+                        surfaceHeight,
                         row * (fieldLength + gap)
                     );
 
-                    field.transform.localScale = new Vector3(
-                        fieldWidth,
-                        1f,
-                        fieldLength
-                    );
+                    Mesh mesh = new Mesh();
+                    mesh.name = "Paddy Field Surface";
+
+                    mesh.vertices = new Vector3[]
+                    {
+                        new Vector3(0, 0, 0),
+                        new Vector3(fieldWidth, 0, 0),
+                        new Vector3(0, 0, fieldLength),
+                        new Vector3(fieldWidth, 0, fieldLength)
+                    };
+
+                    mesh.triangles = new int[]
+                    {
+                        0, 2, 1,
+                        2, 3, 1
+                    };
+
+                    mesh.RecalculateNormals();
+
+                    MeshFilter filter =
+                        field.AddComponent<MeshFilter>();
+
+                    filter.sharedMesh = mesh;
+
+                    MeshRenderer renderer =
+                        field.AddComponent<MeshRenderer>();
+
+                    renderer.sharedMaterial = soilMaterial;
                 }
             }
+
+            Debug.Log("EXITA: 20 paddy field surfaces created.");
         }
     }
 }
