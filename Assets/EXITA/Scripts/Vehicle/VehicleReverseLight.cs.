@@ -1,0 +1,25 @@
+
+using UnityEngine;
+
+namespace ExitaUtara
+{
+    public class VehicleReverseLight : MonoBehaviour
+    {
+        [SerializeField] private VehicleGearSystem gearSystem;
+        [SerializeField] private Light leftLight;
+        [SerializeField] private Light rightLight;
+
+        private void Update()
+        {
+            bool reversing = gearSystem != null &&
+                gearSystem.CurrentGear ==
+                VehicleGearSystem.Gear.Reverse;
+
+            if (leftLight != null)
+                leftLight.enabled = reversing;
+
+            if (rightLight != null)
+                rightLight.enabled = reversing;
+        }
+    }
+}
