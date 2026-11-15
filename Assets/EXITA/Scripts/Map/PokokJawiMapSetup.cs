@@ -1,4 +1,5 @@
 
+using System.Reflection;
 using UnityEngine;
 
 namespace Exita.Utara.Map
@@ -8,45 +9,54 @@ namespace Exita.Utara.Map
         [ContextMenu("Build Pokok Jawi Map")]
         public void BuildMap()
         {
-            CreateBuilder("Terrain",
-                typeof(PokokJawiTerrainBuilder));
+            BuildPart("Terrain", typeof(PokokJawiTerrainBuilder));
+            BuildPart("Paddy Soil", typeof(PokokJawiPaddySoilBuilder));
+            BuildPart("Paddy Fields", typeof(PokokJawiFieldBuilder));
+            BuildPart("Canals", typeof(PokokJawiCanalBuilder));
+            BuildPart("Canal Water", typeof(PokokJawiCanalWater));
+            BuildPart("Field Bunds", typeof(PokokJawiFieldBundBuilder));
+            BuildPart("Village Roads", typeof(PokokJawiRoadBuilder));
 
-            CreateBuilder("Paddy Soil",
-                typeof(PokokJawiPaddySoilBuilder));
-
-            CreateBuilder("Paddy Fields",
-                typeof(PokokJawiFieldBuilder));
-
-            CreateBuilder("Canals",
-                typeof(PokokJawiCanalBuilder));
-
-            CreateBuilder("Canal Water",
-                typeof(PokokJawiCanalWater));
-
-            CreateBuilder("Field Bunds",
-                typeof(PokokJawiFieldBundBuilder));
-
-            CreateBuilder("Village Roads",
-                typeof(PokokJawiRoadBuilder));
-
-            Debug.Log(
-                "Pokok Jawi map components created. " +
-                "Run each builder to generate its mesh."
-            );
+            Debug.Log("EXITA: Pokok Jawi map build completed.");
         }
 
-        private void CreateBuilder(
-            string objectName,
-            System.Type builderType)
+        private void BuildPart(string objectName, System.Type builderType)
         {
             Transform existing = transform.Find(objectName);
 
-            if (existing != null)
-                return;
+            GameObject item;
 
-            GameObject item = new GameObject(objectName);
-            item.transform.SetParent(transform, false);
-            item.AddComponent(builderType);
+            if (existing != null)
+            {
+                item = existing.gameObject;
+            }
+            else
+            {
+                item = new GameObject(objectName);
+                item.transform.SetParent(transform, false);
+            }
+
+            Component builder = item.GetComponent(builderType);
+
+            if (builder == null)
+                builder = item.AddComponent(builderType);
+
+            MethodInfo[] methods = builderType.GetMethods(
+                BindingFlags.Instance |
+                BindingFlags.Public |
+                BindingFlags.NonPublic
+            );
+
+            foreach (MethodInfo method in methods)
+            {
+                if (method.Name.StartsWith("Build") &&
+                    method.GetParameters().Length == 0 &&
+                    method.ReturnType == typeof(void))
+                {
+                    method.Invoke(builder, null);
+                    break;
+                }
+            }
         }
     }
 }
