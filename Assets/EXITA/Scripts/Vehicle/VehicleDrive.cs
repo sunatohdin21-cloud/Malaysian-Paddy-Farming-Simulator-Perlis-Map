@@ -14,8 +14,9 @@ namespace ExitaUtara
         [Header("Steering")]
         public float turnSpeed = 65f;
 
-        [Header("Fuel")]
+        [Header("Systems")]
         public VehicleFuelSystem fuelSystem;
+        public VehicleEngineStarter engineStarter;
 
         private Rigidbody rb;
 
@@ -33,14 +34,17 @@ namespace ExitaUtara
             float brake = MobileTractorInput.Brake;
             float steering = MobileTractorInput.Steering;
 
+            bool engineOn = engineStarter != null &&
+                            engineStarter.EngineRunning;
+
             bool hasFuel = fuelSystem == null ||
                            fuelSystem.HasFuel();
 
             Vector3 velocity =
                 transform.InverseTransformDirection(rb.velocity);
 
-            if (throttle > 0f && hasFuel &&
-                velocity.z < maxSpeed)
+            if (engineOn && hasFuel &&
+                throttle > 0f && velocity.z < maxSpeed)
             {
                 rb.AddForce(
                     transform.forward * acceleration,
@@ -60,14 +64,14 @@ namespace ExitaUtara
             {
                 float direction = velocity.z >= 0f ? 1f : -1f;
 
-                Quaternion rotation = Quaternion.Euler(
+                Quaternion turn = Quaternion.Euler(
                     0f,
                     steering * turnSpeed *
                     direction * Time.fixedDeltaTime,
                     0f
                 );
 
-                rb.MoveRotation(rb.rotation * rotation);
+                rb.MoveRotation(rb.rotation * turn);
             }
         }
     }
